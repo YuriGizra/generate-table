@@ -1,13 +1,13 @@
 <?php
 
-class Jump {
+class GenerateTable {
   // Connection to database.
   protected $db;
 
   protected $table;
 
   // Data to build table.
-  protected $data=array();
+  protected $data = array();
 
   // Mapping titles to fields in table. Keys is title table, value is database field name, nothing for empty column.
   public $fields = array (
@@ -17,7 +17,7 @@ class Jump {
     'Special' => '',
     'Curator' => '',
     'Institution' => '_institution',
-    'Solo' => ''
+//    'Solo' => ''
   );
 
   // Fields need process values.
@@ -40,7 +40,7 @@ class Jump {
     }
 
     $fields = rtrim($fields, ", ");
-    $stmt = $this->db->query('SELECT ' . $fields . ' from ' . $this->table . ' LIMIT 7');
+    $stmt = $this->db->query('SELECT ' . $fields . ' from ' . $this->table . ' WHERE `__id` %500 = 0');
     $this->data = $stmt->fetchAll(PDO::FETCH_ASSOC);
   }
 
@@ -64,8 +64,13 @@ class Jump {
       print ('| ');
       foreach ($this->fields as $title => $field) {
 
-        $value = empty($field) ? '' : $row[$field];
+        if(array_key_exists($field, $this->special_fields)) {
 
+          $value = count(explode(',', $row[$field]));
+        }
+        else {
+          $value = empty($field) ? '' : $row[$field];
+        }
         echo str_pad($value, $length[$title]) . " | ";
       }
 
@@ -89,6 +94,11 @@ class Jump {
     // Increase length by values from table.
     foreach ($this->data as $row) {
       foreach ($row as $field => $value) {
+        // skip for special fields.
+        if (array_key_exists($field, $this->special_fields)) {
+          continue;
+        }
+
         $key = array_search($field, $this->fields);
         if (strlen(trim($value)) > $length[$key]) {
           $length[$key] = strlen(trim($value));

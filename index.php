@@ -1,7 +1,7 @@
 <?php
 //header('Content-type: text/plain; charset=utf-8');
 require 'Database.php';
-require 'Jump.php';
+require 'GenerateTable.php';
 //include 'view/header.html';
 ini_set('display_errors', 1);
 //require 'Jump.php';
@@ -15,7 +15,7 @@ $db_settings = array(
   'pass' => 'root',
 );
 
-$jump = new Jump($db_settings);
+$jump = new GenerateTable($db_settings);
 
 $jump->getData();
 $jump->builtTable();
