@@ -1,2 +1,2 @@
 # generate-table
-Generate gerkin table for migration tests.
+Generate gherkin table for migration tests.

@@ -7,12 +7,12 @@ class GenerateTable {
   protected $table;
 
   // Data to build table.
-  protected $data = array();
+  public $data = array();
 
   // Mapping titles to fields in table. Keys is title table, value is database field name, nothing for empty column.
   public $fields = array (
     'Title' => '_titlee',
-    'Artist'=> '',
+    'Artist'=> '_artiste',
     'Number of pics' => '_multimediae',
     'Special' => '',
     'Curator' => '',
@@ -25,21 +25,14 @@ class GenerateTable {
     '_multimediae' => 'count'
   );
 
-  public function __construct($db_settings) {
-    $this->db = Database::connect($db_settings);
-    $this->table = $db_settings['db_table'];
+  public function __construct() {
+    $this->db = Database::connect();
+//    $this->table = $db_settings['db_table'];
   }
 
   public function getData(){
 
-    $fields = '';
-    foreach ($this->fields as $field) {
-      if(!empty($field)) {
-        $fields .= "`" . $field . "`, ";
-      }
-    }
-
-    $fields = rtrim($fields, ", ");
+    $fields = $this->fieldsToString();
     $stmt = $this->db->query('SELECT ' . $fields . ' from ' . $this->table . ' WHERE `__id` %500 = 0');
     $this->data = $stmt->fetchAll(PDO::FETCH_ASSOC);
   }
@@ -64,14 +57,14 @@ class GenerateTable {
       print ('| ');
       foreach ($this->fields as $title => $field) {
 
-        if(array_key_exists($field, $this->special_fields)) {
+        if (array_key_exists($field, $this->special_fields)) {
 
           $value = count(explode(',', $row[$field]));
         }
         else {
           $value = empty($field) ? '' : $row[$field];
         }
-        echo str_pad($value, $length[$title]) . " | ";
+        echo str_pad(($value), $length[$title]) . " | ";
       }
 
       echo "\n";
@@ -106,5 +99,20 @@ class GenerateTable {
       }
     }
     return $length;
+  }
+
+  /**
+   * @return string
+   */
+  public function fieldsToString() {
+    $fields = '';
+    foreach ($this->fields as $field) {
+      if (!empty($field)) {
+        $fields .= "`" . $field . "`, ";
+      }
+    }
+
+    $fields = rtrim($fields, ", ");
+    return $fields;
   }
 }
