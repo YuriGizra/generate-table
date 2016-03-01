@@ -3,6 +3,7 @@ header('Content-Type: text/html; charset=utf-8');
 require 'Database.php';
 require 'GenerateTable.php';
 require 'Artists.php';
+require 'ClassTable.php';
 ini_set('display_errors', 1);
 
 
@@ -20,8 +21,11 @@ $db_settings = array(
 //$jump->getData();
 //$jump->builtTable();
 
-$artistTable = new Artists();
-$artistTable->getData();
-$artistTable->builtTable();
+//$artistTable = new Artists();
+//$artistTable->getData();
+//$artistTable->builtTable();
 
+$classTable = new ClassTable();
+$classTable->getData();
+$classTable->builtTable();
 

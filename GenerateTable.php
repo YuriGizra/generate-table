@@ -64,6 +64,12 @@ class GenerateTable {
         else {
           $value = empty($field) ? '' : $row[$field];
         }
+
+        if ($title == 'Description') {
+
+          $value = strip_tags($value);
+          $value = substr($value, 0, 50);
+        }
         echo str_pad(($value), $length[$title]) . " | ";
       }
 

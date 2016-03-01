@@ -13,7 +13,7 @@ class Artists extends GenerateTable {
 
   public $fields = array(
     'Title' => '_artistec',
-    'Full name' => '_artiste',
+    'Full name' => '_artiste_he',
     'Final editing' => '_finaleditinge_he'
   );
 
