@@ -5,11 +5,14 @@ class ClassTable extends GenerateTable {
     'host'=>'localhost',
     'db_name' => 'IMJ',
     'db_table' => '_raw_chugim',
+    'join_left' => ''
     'user' => 'root',
     'pass' => 'root',
   );
 
   protected $table = '_raw_artists';
+  
+  protected $join_left = array();
 
   public $fields = array(
     'Title' => '_chugnum',

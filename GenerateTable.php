@@ -2,45 +2,74 @@
 
 class GenerateTable {
   // Connection to database.
-  protected $db;
+  protected $dbConnction;
 
-  protected $table;
+  protected $dbSettings;
 
   // Data to build table.
-  public $data = array();
+  public $data;
 
   // Mapping titles to fields in table. Keys is title table, value is database field name, nothing for empty column.
-  public $fields = array (
-    'Title' => '_titlee',
-    'Artist'=> '_artiste',
-    'Number of pics' => '_multimediae',
-    'Special' => '',
-    'Curator' => '',
-    'Institution' => '_institution',
-//    'Solo' => ''
-  );
+  public $fields;
 
   // Fields need process values.
-  public $special_fields = array (
-    '_multimediae' => 'count'
-  );
+  public $prepare_fields = array();
 
-  public function __construct() {
-    $this->db = Database::connect();
-//    $this->table = $db_settings['db_table'];
+  public function __construct($db_settings, $fields, $prepare_fields) {
+    $this->dbSettings = $db_settings;
+    $this->fields = $fields;
+    $this->prepare_fields = $prepare_fields;
+    $this->dbConnction = Database::connect($db_settings);
+
+    $this->getData();
+
+    $table_data = $this->prepareValues();
+
+    $this->builtTable($table_data);
   }
 
-  public function getData(){
-
-    $fields = $this->fieldsToString();
-    $stmt = $this->db->query('SELECT ' . $fields . ' from ' . $this->table . ' WHERE `__id` %500 = 0');
+  public function getData() {
+    $join = !empty($this->dbSettings['join_table']) ?
+      ' LEFT JOIN ' . $this->dbSettings['join_table']['table'] . ' ON '
+      . $this->dbSettings['db_table'] . '.' . $this->dbSettings['join_table']['field1']
+      . '=' . $this->dbSettings['join_table']['table'] . '.' . $this->dbSettings['join_table']['field2'] . ' ' :
+      '';
+    $stmt = $this->dbConnction->query('SELECT * FROM ' . $this->dbSettings['db_table']
+      . $join . ' WHERE ' . $this->dbSettings['db_table'] . '.`__id` %' . $this->dbSettings['every_n_rows'] . ' = 0');
     $this->data = $stmt->fetchAll(PDO::FETCH_ASSOC);
   }
 
-  public function builtTable() {
+  public function prepareValues() {
+    $table_data = array();
+    $n=0;
+    foreach ($this->data as $row) {
+
+      foreach ($this->fields as $title => $field) {
+//        echo $field . " | + \n";
+
+//        if (empty($row[$field])) {
+//          $table_data[$n][$title] = '';
+//          continue;
+//        }
+
+        // Simple mapping.
+        if (!array_key_exists($title, $this->prepare_fields)){
+          $table_data[$n][$title] = trim($row[$field]);
+        }
+        else {
+          // TODO: add functions for other fields.
+          $table_data[$n][$title] = $this->handleValue($this->prepare_fields[$title], $row);
+        }
+      }
+      $n++;
+    }
+    return $table_data;
+  }
+
+  public function builtTable($table_data) {
 
     // Calculate length for cell table.
-    $length = $this->getLength();
+    $length = $this->getLength($table_data);
     echo '<pre>';
 
     // Titles.
@@ -53,23 +82,9 @@ class GenerateTable {
 
     // Values.
 
-    foreach($this->data as $row) {
+    foreach($table_data as $row) {
       print ('| ');
-      foreach ($this->fields as $title => $field) {
-
-        if (array_key_exists($field, $this->special_fields)) {
-
-          $value = count(explode(',', $row[$field]));
-        }
-        else {
-          $value = empty($field) ? '' : $row[$field];
-        }
-
-        if ($title == 'Description') {
-
-          $value = strip_tags($value);
-          $value = substr($value, 0, 50);
-        }
+      foreach ($row as $title => $value) {
         echo str_pad(($value), $length[$title]) . " | ";
       }
 
@@ -82,43 +97,44 @@ class GenerateTable {
   /**
    * @return array
    */
-  public function getLength()
+  public function getLength($table_data)
   {
-  // Set length of column by Title.
+
+    // Set length of column by Title.
     $length = array();
-    foreach (array_keys($this->fields) as $title) {
+    foreach (reset($table_data) as $title => $value) {
       $length[$title] = strlen($title);
     }
 
-    // Increase length by values from table.
-    foreach ($this->data as $row) {
-      foreach ($row as $field => $value) {
-        // skip for special fields.
-        if (array_key_exists($field, $this->special_fields)) {
-          continue;
-        }
-
-        $key = array_search($field, $this->fields);
-        if (strlen(trim($value)) > $length[$key]) {
-          $length[$key] = strlen(trim($value));
+    // Increase length by longest value by col.
+    foreach ($table_data as $row) {
+      foreach ($row as $key => $value) {
+        if (strlen($value) > $length[$key]) {
+          $length[$key] = strlen($value);
         }
       }
     }
+
+
+
     return $length;
   }
 
-  /**
-   * @return string
-   */
-  public function fieldsToString() {
-    $fields = '';
-    foreach ($this->fields as $field) {
-      if (!empty($field)) {
-        $fields .= "`" . $field . "`, ";
-      }
+  public function handleValue($settings, $row) {
+
+    switch ($settings['operation']) {
+      case 'cut':
+        echo '<pre>' . var_dump($row[$settings['field']]) . '</pre>' ;
+//        $v = substr($row[$settings['field']], 0, $settings['length']);
+//        echo  $v;
+        break;
+
+      default:
+        return '';
     }
 
-    $fields = rtrim($fields, ", ");
-    return $fields;
+
+    return '';
   }
+
 }
