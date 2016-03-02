@@ -1,4 +1,5 @@
 <?php
+header('Content-Type: text/html; charset=utf-8');
 require 'Database.php';
 require 'GenerateTable.php';
 
@@ -13,12 +14,12 @@ $db_settings = array(
     'field1' => '_lecturer',
     'field2' => '_idnum',
   ),
-  'every_n_rows' => 2,
+  'every_n_rows' => 4,
 );
 
 $fields = array(
   'Title' => '',
-  'Lecturer' => '_firstname',
+  'Lecturer' => '',
   'Cost' => '_cost',
   'Description' => '',
   'Number of pics' => ''
@@ -31,11 +32,11 @@ $prepare_fields = array(
     'separate' => '-'
   ),
 
-//  'Lecturer' => array(
-//    'operation' => 'concat',
-//    'fields' => '_firstname,_lastname',
-//    'separate' => ' '
-//  ),
+  'Lecturer' => array(
+    'operation' => 'concat',
+    'fields' => '_firstname,_lastname',
+    'separate' => ' '
+  ),
   'Description' => array(
     'field' => '_description',
     'operation' => 'cut',
@@ -45,7 +46,7 @@ $prepare_fields = array(
   'Number of pics' => array(
     'operation' => 'count_values',
     // 'multivalue' => ',',
-     'multifields' => '_pic_1,_pic_2,_pic_3,_pic_4,_pic_5,_pic_6'
+     'multifields' => '_pic1,_pic2,_pic3,_pic4,_pic5,_pic6'
   ),
 );
 

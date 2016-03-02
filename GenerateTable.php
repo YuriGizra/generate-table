@@ -4,6 +4,7 @@ class GenerateTable {
   // Connection to database.
   protected $dbConnction;
 
+  // database settings.
   protected $dbSettings;
 
   // Data to build table.
@@ -45,12 +46,6 @@ class GenerateTable {
     foreach ($this->data as $row) {
 
       foreach ($this->fields as $title => $field) {
-//        echo $field . " | + \n";
-
-//        if (empty($row[$field])) {
-//          $table_data[$n][$title] = '';
-//          continue;
-//        }
 
         // Simple mapping.
         if (!array_key_exists($title, $this->prepare_fields)){
@@ -115,26 +110,46 @@ class GenerateTable {
       }
     }
 
-
-
     return $length;
   }
 
   public function handleValue($settings, $row) {
 
+    $v='';
+
     switch ($settings['operation']) {
+
       case 'cut':
-        echo '<pre>' . var_dump($row[$settings['field']]) . '</pre>' ;
-//        $v = substr($row[$settings['field']], 0, $settings['length']);
-//        echo  $v;
-        break;
+        $v = substr(strip_tags($row[$settings['field']]), 0, $settings['length']);
+        return  $v;
+
+      case 'concat':
+        $fields = explode(',', $settings['fields']);
+        foreach ($fields as $field) {
+          $v .= $row[$field] . $settings['separate'];
+        }
+        return rtrim($v, $settings['separate']);
+
+      case 'count_values':
+
+        if (!empty($settings['multifields'])){
+          $v=0;
+          $fields = explode(',', $settings['multifields']);
+
+          foreach($fields as $field ) {
+            if(!empty($row[$field])) $v++;
+          }
+          return $v;
+        }
+
+      return;
 
       default:
-        return '';
+        return;
     }
 
 
-    return '';
+    return;
   }
 
 }
