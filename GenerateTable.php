@@ -29,7 +29,12 @@ class GenerateTable {
     $this->builtTable($table_data);
   }
 
+  /**
+   *
+   */
   public function getData() {
+
+    // todo: join multitable - 'join_table' = array( 'table_name' => 'field1=field2', ..., ).
     $join = !empty($this->dbSettings['join_table']) ?
       ' LEFT JOIN ' . $this->dbSettings['join_table']['table'] . ' ON '
       . $this->dbSettings['db_table'] . '.' . $this->dbSettings['join_table']['field1']
@@ -49,7 +54,7 @@ class GenerateTable {
 
         // Simple mapping.
         if (!array_key_exists($title, $this->prepare_fields)){
-          $table_data[$n][$title] = trim($row[$field]);
+          $table_data[$n][$title] = empty($row[$field]) ? '' : trim($row[$field]);
         }
         else {
           // TODO: add functions for other fields.
@@ -113,36 +118,75 @@ class GenerateTable {
     return $length;
   }
 
+  /**
+   * Return handled value by settings operation.
+   *
+   * @param $settings
+   * field -
+   *
+   * Operations:
+   *   text_limit - Cut string until $settings['length'] char.
+   *   concat - concatenate fields and separate with $settings['separate'].
+   *   count_values -
+   *   count_fields -
+   *   or -
+   *
+   *   Todo: fill Operations.
+   * @param $row
+   *   Array. The row from sql table.
+   *
+   * @return int|string|void.
+   *
+   */
+
   public function handleValue($settings, $row) {
 
-    $v='';
+    $value='';
 
     switch ($settings['operation']) {
 
-      case 'cut':
-        $v = substr(strip_tags($row[$settings['field']]), 0, $settings['length']);
-        return  $v;
+      case 'text_limit':
+
+        // Todo: for hebrew : mb_substr ("String", 0, $len, 'utf-8') or mb_strcut();
+        $value = substr(strip_tags($row[$settings['field']]), 0, $settings['length']);
+        return  $value;
 
       case 'concat':
         $fields = explode(',', $settings['fields']);
         foreach ($fields as $field) {
-          $v .= $row[$field] . $settings['separate'];
+          $value .= $row[$field] . $settings['separate'];
         }
-        return rtrim($v, $settings['separate']);
+        return rtrim($value, $settings['separate']);
 
       case 'count_values':
+        $values = explode(',', $row[$settings['field']]);
+        return count(array_filter($values));
+
+
+      case 'count_fields':
 
         if (!empty($settings['multifields'])){
-          $v=0;
+          $value=0;
           $fields = explode(',', $settings['multifields']);
 
           foreach($fields as $field ) {
-            if(!empty($row[$field])) $v++;
+            if(!empty($row[$field])) $value++;
           }
-          return $v;
+          return $value;
+        }
+        return;
+
+      case 'or':
+        $fields = explode(',', $settings['fields']);
+        foreach($fields as $field) {
+          if (empty($row[$field])){
+            continue;
+          }
+          $value = trim($row[$field]);
         }
 
-      return;
+      return $value;
+
 
       default:
         return;

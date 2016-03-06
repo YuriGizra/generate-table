@@ -1,7 +1,7 @@
 <?php
 header('Content-Type: text/html; charset=utf-8');
-require 'Database.php';
-require 'GenerateTable.php';
+require '../Database.php';
+require '../GenerateTable.php';
 
 $db_settings = array(
   'host'=>'localhost',
@@ -14,12 +14,12 @@ $db_settings = array(
     'field1' => '_lecturer',
     'field2' => '_idnum',
   ),
-  'every_n_rows' => 4,
+  'every_n_rows' => 2,
 );
 
 $fields = array(
   'Title' => '',
-  'Lecturer' => '',
+  'Artist' => '_artiste_he',
   'Cost' => '_cost',
   'Description' => '',
   'Number of pics' => ''
@@ -39,14 +39,13 @@ $prepare_fields = array(
   ),
   'Description' => array(
     'field' => '_description',
-    'operation' => 'cut',
+    'operation' => 'text_limit',
     'length' => '70',
   ),
 
   'Number of pics' => array(
-    'operation' => 'count_values',
-    // 'multivalue' => ',',
-     'multifields' => '_pic1,_pic2,_pic3,_pic4,_pic5,_pic6'
+    'operation' => 'count_fields',
+    'multifields' => '_pic1,_pic2,_pic3,_pic4,_pic5,_pic6'
   ),
 );
 
