@@ -57,7 +57,6 @@ class GenerateTable {
           $table_data[$n][$title] = empty($row[$field]) ? '' : trim($row[$field]);
         }
         else {
-          // TODO: add functions for other fields.
           $table_data[$n][$title] = $this->handleValue($this->prepare_fields[$title], $row);
         }
       }
