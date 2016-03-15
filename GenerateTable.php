@@ -62,32 +62,33 @@ class GenerateTable {
       }
       $n++;
     }
+
+    // format data (add spaces).
+    $length = $this->getLength($table_data);
+
+    $titles = array_keys(reset($table_data));
+    array_walk($titles, function(&$value, $key, $length) {
+      $value = str_pad($value, $length[$value]) ;
+    }, $length);
+
+    array_walk_recursive($table_data, function(&$value, $key, $length) {
+      $value = str_pad($value, $length[$key]) ;
+    }, $length);
+
+    $table_data['titles'] = $titles;
     return $table_data;
   }
 
   public function builtTable($table_data) {
-
-    // Calculate length for cell table.
-    $length = $this->getLength($table_data);
     echo '<pre>';
 
     // Titles.
-
-    print ('| ');
-    foreach($this->fields as $title => $field) {
-      print(str_pad($title, $length[$title])) . " | ";
-    }
-    print( "\n");
+    echo '| ' . implode(' | ', $table_data['titles']) . ' |' . "\n";
+    unset($table_data['titles']);
 
     // Values.
-
     foreach($table_data as $row) {
-      print ('| ');
-      foreach ($row as $title => $value) {
-        echo str_pad(($value), $length[$title]) . " | ";
-      }
-
-      echo "\n";
+      echo '| ' . implode(' | ', $row) . ' |' . "\n";
     }
     echo '</pre>';
   }
@@ -186,11 +187,9 @@ class GenerateTable {
 
       return $value;
 
-
       default:
         return;
     }
-
 
     return;
   }
